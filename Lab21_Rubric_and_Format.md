@@ -52,7 +52,7 @@ Sau khi hoàn thành lab này, học viên có thể:
 ### Step 1 — Dataset Preparation (15 phút)
 
 **Yêu cầu:**
-- Chuẩn bị **100–500 examples** Alpaca format từ một domain bạn chọn (y tế / tài chính / giáo dục / e-commerce…)
+- Chuẩn bị **100–500 examples** Alpaca format từ một domain bạn chọn
 - Format: `{"instruction": "...", "input": "...", "output": "..."}`
 - Clean: dedup, remove samples có output quá ngắn (<10 tokens), filter templates
 - Token length analysis → set `max_seq_length = p95` (round up to power of 2)
@@ -60,7 +60,7 @@ Sau khi hoàn thành lab này, học viên có thể:
 
 **Có thể dùng** (🎨 **Free style — pick whatever excites you**):
 
-#### Sample datasets theo domain (chỉ là gợi ý, bạn có thể dùng bất kỳ):
+#### Sample datasets theo domain (chỉ là gợi ý):
 
 | Domain | Sample Dataset HuggingFace |
 |--------|---------------------------|
@@ -77,11 +77,11 @@ Sau khi hoàn thành lab này, học viên có thể:
 
 #### Hoặc tự tạo dataset cho domain bạn quan tâm:
 
-- **Tiếng Việt vertical**: tax advisor, medical advice (Vinmec articles), recipes Việt Nam, lịch sử VN, e-commerce reviews
+- **Tiếng Việt vertical**: tax advisor, medical advice, recipes Việt Nam, lịch sử VN, e-commerce reviews
 - **Style/format**: JSON structured output, Markdown formatting, specific tone (Gen-Z / formal), company-specific support agent
 - **Niche knowledge**: VinUniversity FAQ bot, course tutor cho 1 môn, technical doc Q&A
 
-> 💡 **Khuyến khích**: dataset tự tạo cho domain bạn passionate → kết quả ấn tượng hơn nhiều so với dùng generic dataset. 200 high-quality custom samples > 2000 noisy generic samples.
+> 💡 **Khuyến khích**: dataset tự tạo cho domain bạn passionate → kết quả ấn tượng hơn nhiều. 200 high-quality custom samples > 2000 noisy generic samples.
 
 ### Step 2 — Configure LoRA (Baseline r=16)
 
@@ -94,7 +94,7 @@ lora_dropout = 0
 gradient_checkpointing = True
 ```
 
-**Model**: 🎨 **Free style — chọn 1 trong 16+ options** (xem `Day21_README.md` cho full list)
+**Model**: 🎨 **Free style — chọn 1 trong 16+ options** (xem `Day21_README.md`)
 
 #### Recommended defaults theo GPU:
 
@@ -112,7 +112,7 @@ gradient_checkpointing = True
 - **Reasoning-heavy** → Phi-3.5-mini, Llama 3.1
 - **Tiny demo / siêu nhanh** → TinyLlama 1.1B, SmolLM2 1.7B
 
-> ⚠️ **Quan trọng**: ghi rõ model bạn chọn vào REPORT.md. Khác model → khác baseline perplexity → so sánh **giữa các bạn** không có ý nghĩa, nhưng so sánh r=8 vs r=16 vs r=64 trên **cùng model** thì ý nghĩa.
+> ⚠️ Ghi rõ model bạn chọn vào REPORT.md. So sánh r=8 vs r=16 vs r=64 trên **cùng model** mới có ý nghĩa.
 
 ### Step 3 — Train Baseline với TRL SFTTrainer
 
@@ -140,7 +140,7 @@ Trên **cùng dataset**, **cùng hyperparameters** khác (chỉ thay rank/alpha)
 |--------|---------|
 | Training time | `time.time()` trước/sau `trainer.train()` |
 | Peak VRAM | `torch.cuda.max_memory_allocated()` |
-| Eval perplexity | `exp(eval_loss)` từ `trainer.evaluate()` |
+| Eval perplexity | `exp(eval_loss)` từ `safe_evaluate()` |
 | Trainable params | sum `p.numel()` cho `p.requires_grad` |
 | Qualitative output | generate 5 prompts, đánh giá chủ quan |
 
@@ -151,30 +151,63 @@ Trên **cùng dataset**, **cùng hyperparameters** khác (chỉ thay rank/alpha)
 
 ---
 
-## 📦 Deliverables
+## 📦 Deliverables — 3 lựa chọn nộp bài
 
-Học viên nộp **một thư mục nén** `lab21_<MSSV>.zip` chứa:
+Hãy chọn **1 trong 3 options** dưới đây tuỳ vào tốc độ internet + LMS limits của bạn:
+
+### 🥉 Option A — Lightweight ZIP (recommended default · ~5-15 MB)
 
 ```
 lab21_<MSSV>/
 ├── REPORT.md                          ← Evaluation report
-├── notebook.ipynb                     ← Jupyter notebook đã chạy (cells có outputs)
+├── notebook.ipynb                     ← Stripped outputs (Cell > All Output > Clear)
 ├── adapters/
-│   ├── r8/                            ← LoRA adapter r=8
-│   ├── r16/                           ← LoRA adapter r=16
-│   └── r64/                           ← LoRA adapter r=64
-├── results/
-│   ├── rank_experiment_summary.csv    ← Bảng so sánh metrics
-│   ├── qualitative_comparison.csv     ← Before/after examples
-│   └── loss_curve.png                 ← Plot loss của baseline
-└── README.md                          ← Hướng dẫn reproduce ngắn (optional but nice)
+│   └── r16/                           ← CHỈ submit best rank (skip r=8 và r=64)
+│       ├── adapter_model.safetensors
+│       └── adapter_config.json        ← (skip tokenizer files — base model có rồi)
+└── results/
+    ├── rank_experiment_summary.csv    ← Numbers cho CẢ 3 ranks (verify được)
+    ├── qualitative_comparison.csv
+    └── loss_curve.png
 ```
 
-### Yêu cầu cho `REPORT.md`
+> Trade-off: chỉ check 1 adapter weights, nhưng metrics đủ trong CSV để verify experiment.
+
+### 🥈 Option B — GitHub + HuggingFace Hub (most professional · ~1 MB ZIP) ⭐ Bonus +5 pts
+
+```
+lab21_<MSSV>/
+├── REPORT.md                          ← Có links đến HF Hub adapters
+├── notebook.ipynb                     ← Stripped outputs
+├── results/                           ← CSVs only
+└── LINKS.md                           ← GitHub repo + HuggingFace URLs
+```
+
+Push adapter lên HuggingFace Hub (free):
+```python
+ft_model.push_to_hub("your-username/lab21-<model>-r16")
+```
+
+Bonus point vì đây là production-grade workflow + adapter publicly verifiable.
+
+### 🥇 Option C — Code-only (purist · ~500 KB)
+
+```
+lab21_<MSSV>/
+├── REPORT.md                          ← Numbers + 5 qualitative examples đầy đủ
+├── notebook.ipynb                     ← Stripped outputs
+└── requirements.txt                   ← Pin versions để reproduce
+```
+
+> Instructor đọc REPORT + check notebook chạy được. Phù hợp nếu kết nối internet chậm.
+
+---
+
+## 📝 Yêu cầu cho `REPORT.md` (cả 3 options đều cần)
 
 Bắt buộc phải có 6 sections:
 
-1. **Setup** — base model, dataset (tên + size), GPU, training cost ước tính
+1. **Setup** — base model (ghi rõ key từ MODEL_PICKER), dataset (tên + size), GPU, training cost ước tính
 2. **Rank Experiment Results** — bảng so sánh 4 chiều (time, VRAM, perplexity, params)
 3. **Loss Curve Analysis** — có overfitting không? Tại sao?
 4. **Qualitative Comparison** — 5 examples before/after, ngắn gọn nhận xét
@@ -183,23 +216,25 @@ Bắt buộc phải có 6 sections:
 
 ---
 
-## 🏆 Scoring Rubric (100 điểm)
+## 🏆 Scoring Rubric (100 điểm + bonus)
 
 | Tiêu chí | Điểm | Mô tả |
 |----------|------|-------|
-| **1. Functionality** — code chạy end-to-end | **40** | Cả 3 adapters trained + saved, không error nghiêm trọng |
+| **1. Functionality** — code chạy end-to-end | **40** | Cả 3 adapters trained + saved (hoặc verifiable qua CSV nếu Option B/C) |
 | **2. Experiment Design & Analysis** | **25** | Rank comparison đầy đủ 4 chiều, có insight về trade-off |
 | **3. Evaluation Quality** | **15** | Perplexity computed đúng, ≥5 qualitative examples meaningful |
 | **4. Report Quality** | **20** | Rõ ràng, đầy đủ 6 sections, conclusion thể hiện hiểu biết |
+| **🎁 Bonus — Option B (HF Hub)** | **+5** | Push adapter lên HuggingFace Hub publicly |
+| **🎁 Bonus — Stretch goals** | **+10** | Target ALL layers / DoRA / GGUF merge / W&B (xem dưới) |
 
-**Tổng: 100 điểm**
+**Tổng**: 100 điểm + tối đa 15 bonus = 115 max.
 
 ### Chi tiết breakdown
 
 #### 1. Functionality (40 pts)
 - (10) Setup environment, dataset prep đúng format Alpaca
-- (10) Baseline r=16 train successfully + adapter saved
-- (10) r=8 và r=64 trained successfully + adapters saved
+- (10) Baseline r=16 train successfully + adapter saved/uploaded
+- (10) r=8 và r=64 trained successfully + metrics ghi lại
 - (10) Eval perplexity computed cho cả 3 ranks (≥2/3 nếu eval gặp OOM nhưng có recovery)
 
 #### 2. Experiment Design & Analysis (25 pts)
@@ -225,7 +260,7 @@ Bắt buộc phải có 6 sections:
 
 | Mức | Điểm | Mô tả |
 |-----|------|-------|
-| **Xuất sắc** | 90–100 | Hoàn thành tất cả + có insight ngoài requirement (vd: thử thêm DoRA, target ALL layers) |
+| **Xuất sắc** | 90–100 (+ bonus) | Hoàn thành tất cả + có insight ngoài requirement |
 | **Tốt** | 75–89 | Đáp ứng đầy đủ requirements, có analysis tốt |
 | **Đạt** | 60–74 | Chạy được code, có report, nhưng analysis còn thiếu sâu |
 | **Chưa đạt** | < 60 | Không hoàn thành ≥1 trong 3 trainings, hoặc report thiếu/sơ sài |
@@ -235,8 +270,8 @@ Bắt buộc phải có 6 sections:
 ## 📤 Submission
 
 - **Hạn nộp**: trước 23:59 ngày sau (sau khi lab kết thúc)
-- **Format nộp**: zip file trên LMS / Google Drive link
-- **File name**: `lab21_<MSSV>_<HoTen>.zip` (ví dụ: `lab21_22BI13123_NguyenVanA.zip`)
+- **Format nộp**: zip file trên LMS / Google Drive link / GitHub link (Option B)
+- **File name**: `lab21_<MSSV>_<HoTen>.zip` (vd: `lab21_22BI13123_NguyenVanA.zip`)
 - **Late policy**: -10% mỗi ngày trễ, sau 3 ngày = 0 điểm
 - **Honor code**: được dùng AI assistant (Claude, ChatGPT) để debug và viết report — nhưng phải **tự chạy training trên máy của bạn**, không copy adapter của bạn khác
 
@@ -245,18 +280,18 @@ Bắt buộc phải có 6 sections:
 ## 💡 Tips & Common Pitfalls
 
 ### ✅ Do's
-- **Bật gradient checkpointing** — giảm 60% VRAM, đáng tradeoff 20% slower
-- **Set `max_seq_length` = p95** của dataset, không quá lớn — tránh padding waste
+- **Bật gradient checkpointing** — giảm 60% VRAM
+- **Set `max_seq_length` = p95** của dataset, không quá lớn
 - **Save adapter NGAY sau train** — trước khi eval (eval có thể OOM nhưng adapter đã safe)
-- **Verify FA2 active** trên GPU lớn: `model.config._attn_implementation`
+- **Strip notebook outputs** trước khi submit (Kernel > Restart & Clear Output) — giảm size đáng kể
 - **Dùng `packing=False`** trên T4/L4 — packing buggy với new transformers
+- **Option B (HF Hub)** — đẹp trên CV, được bonus
 
 ### ❌ Don'ts
-- **Đừng** train cả 3 ranks trong cùng cell — phải reset CUDA cache giữa runs
+- **Đừng** include cả 3 adapter folders trong ZIP nếu submission limit chặt
 - **Đừng** quên `del trainer; gc.collect(); torch.cuda.empty_cache()` giữa các rank training
 - **Đừng** dùng `eval_strategy="steps"` trên T4 — sẽ OOM giữa training
-- **Đừng** chọn cherry-picked examples cho qualitative — chọn random + report cả wins lẫn losses
-- **Đừng** copy report của bạn khác — sẽ phát hiện qua perplexity numbers (không thể fake)
+- **Đừng** copy report của bạn khác — sẽ phát hiện qua perplexity numbers
 
 ### 🐛 Common Errors & Fixes
 
@@ -279,7 +314,7 @@ Cho học viên muốn đi sâu thêm:
 2. **DoRA variant** — dùng `use_dora=True` trong PEFT config. Có cải thiện perplexity không?
 3. **Merge + GGUF** — merge adapter với base, convert sang GGUF format, test với llama.cpp
 4. **W&B integration** — track loss curves real-time, share W&B run link trong report
-5. **Custom domain dataset** — dùng dataset tự tạo từ domain bạn quan tâm (y tế / luật / fintech…). Cần ≥200 examples chất lượng cao.
+5. **Custom domain dataset** — dùng dataset tự tạo từ domain bạn quan tâm. Cần ≥200 examples chất lượng cao.
 
 ---
 
@@ -295,20 +330,20 @@ Cho học viên muốn đi sâu thêm:
 
 ## 📊 Sample REPORT.md Template
 
-Dưới đây là template các bạn có thể copy + điền:
-
 ```markdown
 # Lab 21 — Evaluation Report
 
 **Học viên**: <Họ tên> — <MSSV>
 **Ngày nộp**: <YYYY-MM-DD>
+**Submission option**: A (lightweight) / B (HF Hub) / C (code-only)
 
 ## 1. Setup
 - **Base model**: <điền model bạn chọn — vd: `unsloth/Llama-3.2-3B-Instruct-bnb-4bit`>
-- **Dataset**: 5CD-AI/Vietnamese-alpaca-gpt4-gg-translated, 300 samples (270 train + 30 eval)
-- **max_seq_length**: 1024 (p95 = 712, rounded up)
-- **GPU**: Tesla T4, 14.5 GB VRAM
-- **Training cost**: $0.42 (~72 phút @ $0.35/hr)
+- **Dataset**: <tên dataset>, <số samples> (X train + Y eval)
+- **max_seq_length**: <số> (p95 = <số>, rounded up)
+- **GPU**: <Tesla T4 / L4 / A100>, <X> GB VRAM
+- **Training cost**: $<số> (~<phút> @ $<rate>/hr)
+- **HF Hub link** (nếu Option B): https://huggingface.co/<username>/<adapter-name>
 
 ## 2. Rank Experiment Results
 
@@ -350,4 +385,4 @@ Dưới đây là template các bạn có thể copy + điền:
 
 **Chúc các bạn lab vui vẻ! 🚀**
 
-> Câu hỏi hoặc khó khăn → liên hệ TA hoặc post lên Slack channel `#lab21-help`
+> Câu hỏi → Slack channel `#lab21-help`

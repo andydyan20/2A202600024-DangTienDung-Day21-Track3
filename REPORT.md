@@ -126,7 +126,7 @@ At r=8, only 0.06% of parameters are trained (1.09M). At r=64, this rises to 0.4
 
 ### 5.1 Baseline (r=16) Training Loss
 
-![Loss Curve — r=16](lost_curve.png)
+![Loss Curve — r=16](loss_curve.png)
 
 **Overfitting assessment**:
 Due to T4 VRAM constraints, `eval_strategy` was set to `"no"` — no mid-training evaluation was performed. Only training loss was logged. Post-training manual evaluation showed eval perplexity of 57.49 (r=16), which is reasonable for a 1.5B model on a 180-sample Vietnamese dataset after only 3 epochs. The training loss curve (see plot) shows a smooth decline without plateauing, indicating the model was still learning. With only 69 total steps, overfitting is unlikely given the small dataset but also hard to confirm without mid-training eval.
@@ -263,12 +263,12 @@ Training only 0.06%–0.49% of parameters achieved meaningful domain adaptation 
 ## 9. Deliverables Checklist
 
 - [x] `REPORT.md` — Evaluation report (this file)
-- [ ] `notebook.ipynb` — Stripped outputs
-- [ ] `adapters/r16/` — Best rank adapter checkpoint
-- [ ] `results/rank_experiment_summary.csv` — Metrics for all 3 ranks
-- [ ] `results/qualitative_comparison.csv` — 5+ before/after examples
-- [ ] `results/loss_curve.png` — Training loss plot
-- [ ] HuggingFace Hub: [`dangtothedung911/DeepSeek-R1-Distill-Qwen-1.5B-bnb-4bit-vi-lab21-r16`](https://huggingface.co/dangtothedung911/DeepSeek-R1-Distill-Qwen-1.5B-bnb-4bit-vi-lab21-r16)
+- [x] `notebook.ipynb` — Stripped outputs
+- [x] `r16` — Best rank adapter checkpoint
+- [x] `rank_experiment_summary` — Metrics for all 3 ranks
+- [x] `qualitative_comparison` — 5+ before/after examples
+- [x] `loss_curve.png` — Training loss plot
+- [x] HuggingFace Hub: [`dangtothedung911/DeepSeek-R1-Distill-Qwen-1.5B-bnb-4bit-vi-lab21-r16`](https://huggingface.co/dangtothedung911/DeepSeek-R1-Distill-Qwen-1.5B-bnb-4bit-vi-lab21-r16)
 
 ---
 
